@@ -48,6 +48,7 @@ def test_node_investigate_hypothesis_empty_action() -> None:
 
 
 def test_node_investigate_hypothesis_unknown_action(monkeypatch: Any) -> None:
+    monkeypatch.setattr(parallel_module, "get_tracker", lambda: _TrackerStub())
     monkeypatch.setattr(
         parallel_module, "get_available_actions", lambda: [_ActionStub("known_action")]
     )
