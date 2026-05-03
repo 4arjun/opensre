@@ -1,7 +1,6 @@
 """Merge node for parallel hypothesis execution results."""
 
 import logging
-from copy import deepcopy
 from typing import Any, cast
 
 from langsmith import traceable
@@ -52,9 +51,7 @@ def merge_hypothesis_results(state: InvestigationState) -> dict:
     input_data = InvestigateInput.from_state(state).model_copy(update={"evidence": base_evidence})
 
     plan_rationale = state.get("plan_rationale", "")
-    available_sources = cast(
-        dict[str, dict[str, object]], deepcopy(state.get("available_sources", {}))
-    )
+    available_sources = cast(dict[str, dict[str, object]], state.get("available_sources", {}))
 
     hypothesis_results = state.get("hypothesis_results", [])
 
