@@ -79,8 +79,8 @@ class TestIsOperationAllowedBlocklist:
         allowed, _ = _is_operation_allowed("Describe_Instances")
         assert allowed is True
 
-        blocked, _ = _is_operation_allowed("Delete_Bucket")
-        assert blocked is False
+        allowed, _ = _is_operation_allowed("Delete_Bucket")
+        assert allowed is False
 
 
 class TestSanitizeResponseDatetime:
@@ -106,13 +106,14 @@ class TestSanitizeResponseBytes:
 
 class TestSanitizeResponseDeepNesting:
     def test_max_depth_reached(self) -> None:
+        default_max_depth = 10
         data: dict = {"leaf": "value"}
-        for _ in range(12):
+        for _ in range(default_max_depth + 2):
             data = {"nested": data}
         result = _sanitize_response(data)
 
         current = result
-        for _ in range(11):
+        for _ in range(default_max_depth + 1):
             current = current["nested"]
         assert current == "... (max depth reached)"
 
