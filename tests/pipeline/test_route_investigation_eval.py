@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from app.pipeline.routing import route_investigation_loop
+from app.pipeline.routing import route_investigation_loop, should_continue_investigation
+
+
+class _ExplodingState:
+    """State-like object that raises on every .get() call."""
+
+    def get(self, _key: str, _default: object | None = None) -> object:
+        raise RuntimeError("state unavailable")
 
 
 def test_route_investigation_loop_goes_to_eval_when_flag_and_rubric() -> None:
@@ -39,3 +46,20 @@ def test_route_investigation_loop_investigate_takes_precedence() -> None:
             }
         )
     assert out == "investigate"
+
+
+def test_should_continue_investigation_defaults_to_publish_on_error() -> None:
+    """Exception during state access falls back safely to 'publish'."""
+    assert should_continue_investigation(_ExplodingState()) == "publish"  # type: ignore[arg-type]
+
+
+def test_should_continue_investigation_publishes_without_available_actions() -> None:
+    """No available actions triggers immediate publish."""
+    state = {
+        "investigation_recommendations": ["inspect logs"],
+        "investigation_loop_count": 0,
+        "available_action_names": [],
+    }
+
+    assert should_continue_investigation(state) == "publish"
+
